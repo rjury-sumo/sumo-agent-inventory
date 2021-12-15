@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+offline.txt
+inventory.txt
+.vscode/launch.json
