@@ -1,0 +1,19 @@
+{
+    "api.version":"v1",
+    "source":{
+      "name":"agent_inventory",
+      "category":"sumo/inventory/agents",
+      "automaticDateParsing":false,
+      "multilineProcessingEnabled":false,
+      "useAutolineMatching":false,
+      "forceTimeZone":false,
+      "filters":[],
+      "cutoffTimestamp":0,
+      "encoding":"UTF-8",
+      "fields":{
+        
+      },
+      "messagePerRequest":false,
+      "sourceType":"HTTP"
+    }
+  }
