@@ -84,4 +84,7 @@ _source="agent_inventory" and _collector="HTTP"
 | first(collectorversion) as collectorversion,first(alive) as alive,max(lastseenalive) as lastseenalive, count by id, name, collectorversion,sourcesyncmode,ephemeral | sort name asc
 | where alive="true"
 | formatdate(tolong(lastseenalive),"yyyy-MM-dd HH:mm:ss ZZZZ") as lastseenalive 
+| parse field =collectorVersion "*.*-*" as major,minor,patch 
+| where minor <361 or (minor =361 and patch < 12) 
+
 ```
