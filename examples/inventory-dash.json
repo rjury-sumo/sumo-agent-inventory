@@ -1,0 +1,418 @@
+
+
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Sumo Collector Inventory",
+    "description": "",
+    "title": "Sumo Collector Inventory",
+    "rootPanel": null,
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-15m"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panel5FCFBCC0BD333846",
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":23}"
+            },
+            {
+                "key": "panel64AB60388FA31B40",
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":14}"
+            },
+            {
+                "key": "panelF6DF5AC29408594F",
+                "structure": "{\"height\":7,\"width\":6,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panelBFD39F708E32CB44",
+                "structure": "{\"height\":7,\"width\":6,\"x\":6,\"y\":0}"
+            },
+            {
+                "key": "panel386A285DB83D0A4E",
+                "structure": "{\"height\":7,\"width\":6,\"x\":12,\"y\":7}"
+            },
+            {
+                "key": "panel0F24B57A806AFA47",
+                "structure": "{\"height\":7,\"width\":6,\"x\":18,\"y\":7}"
+            },
+            {
+                "key": "panel46A476B3B70BFB41",
+                "structure": "{\"height\":7,\"width\":6,\"x\":0,\"y\":7}"
+            },
+            {
+                "key": "panel1DA716A88A9D9B40",
+                "structure": "{\"height\":7,\"width\":6,\"x\":6,\"y\":7}"
+            },
+            {
+                "key": "panel89A54BA8BA69A84E",
+                "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":0}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panel5FCFBCC0BD333846",
+            "title": "Inventory - Versions Compliant With Min_Version",
+            "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_source=\"agent_inventory\" _sourcecategory=sumo/inventory/agents \t{{{keywords}}}\n| parse regex \"(?<json_collector>\\{.+\\})\" \n| json field=json_collector \"id\"\n| json field=json_collector \"name\"\n| json field=json_collector \"fields\"\n| json field=json_collector \"ephemeral\"\n| json field=json_collector \"osName\"\n| json field=json_collector \"osArch\"\n| json field=json_collector \"lastSeenAlive\"\n| json field=json_collector \"alive\"\n| json field=json_collector \"collectorVersion\"\n| json field=json_collector \"sourceSyncMode\"\n| where {{field}} matches \"{{value}}\"\n| first(sourcesyncmode) as sourcesyncmode,first(ephemeral) as ephemeral,first(collectorversion) as collectorversion,first(alive) as alive,max(lastseenalive) as lastseenalive, count by id, name,osname,osarch \n| \"{{min_version}}\" as min_version\n| parse field =min_version \"*.*-*\" as major1,minor1,patch1\n| parse field =collectorVersion \"*.*-*\" as major,minor,patch \n| if( major >= major1 and  num(minor) >= num(minor1)  and num(patch) >= num(patch1),\"compliant\",\"non-compliant\") as compliance\n| where compliance=\"compliant\" | fields -_some_matched,major,major1,minor,minor1,patch,patch1,_count\n| sort name asc\n\n| formatdate(tolong(lastseenalive),\"yyyy-MM-dd HH:mm:ss ZZZZ\") as lastseenalive \n\n\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel64AB60388FA31B40",
+            "title": "Inventory - Non Compliant Version Below min_ver",
+            "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_source=\"agent_inventory\" _sourcecategory=sumo/inventory/agents \t{{{keywords}}}\n| parse regex \"(?<json_collector>\\{.+\\})\" \n| json field=json_collector \"id\"\n| json field=json_collector \"name\"\n| json field=json_collector \"fields\"\n| json field=json_collector \"ephemeral\"\n| json field=json_collector \"osName\"\n| json field=json_collector \"osArch\"\n| json field=json_collector \"lastSeenAlive\"\n| json field=json_collector \"alive\"\n| json field=json_collector \"collectorVersion\"\n| json field=json_collector \"sourceSyncMode\"\n| where {{field}} matches \"{{value}}\"\n| first(sourcesyncmode) as sourcesyncmode,first(ephemeral) as ephemeral,first(collectorversion) as collectorversion,first(alive) as alive,max(lastseenalive) as lastseenalive, count by id, name,osname,osarch \n| \"{{min_version}}\" as min_version\n| parse field =min_version \"*.*-*\" as major1,minor1,patch1\n| parse field =collectorVersion \"*.*-*\" as major,minor,patch \n| if( major >= major1 and  num(minor) >= num(minor1)  and num(patch) >= num(patch1),\"compliant\",\"non-compliant\") as compliance\n| where compliance=\"non-compliant\" | fields -_some_matched,major,major1,minor,minor1,patch,patch1,_count\n| sort name asc\n\n| formatdate(tolong(lastseenalive),\"yyyy-MM-dd HH:mm:ss ZZZZ\") as lastseenalive \n\n\n\n\n\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelF6DF5AC29408594F",
+            "title": "Versions Compliance",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_source=\"agent_inventory\" _sourcecategory=sumo/inventory/agents \t{{{keywords}}}\n| parse regex \"(?<json_collector>\\{.+\\})\" \n| json field=json_collector \"id\"\n| json field=json_collector \"name\"\n| json field=json_collector \"fields\"\n| json field=json_collector \"ephemeral\"\n| json field=json_collector \"osName\"\n| json field=json_collector \"osArch\"\n| json field=json_collector \"lastSeenAlive\"\n| json field=json_collector \"alive\"\n| json field=json_collector \"collectorVersion\"\n| json field=json_collector \"sourceSyncMode\"\n| where {{field}} matches \"{{value}}\"\n| first(sourcesyncmode) as sourcesyncmode,first(ephemeral) as ephemeral,first(collectorversion) as collectorversion,first(alive) as alive,max(lastseenalive) as lastseenalive, count by id, name,osname,osarch \n| \"{{min_version}}\" as min_version\n| parse field =min_version \"*.*-*\" as major1,minor1,patch1\n| parse field =collectorVersion \"*.*-*\" as major,minor,patch | fields -_some_matched\n| if( major >= major1 and  num(minor) >= num(minor1)  and num(patch) >= num(patch1),\"compliant\",\"non-compliant\") as compliance\n\n| count by  compliance\n\n\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelBFD39F708E32CB44",
+            "title": "Inventory - Versions",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_source=\"agent_inventory\" _sourcecategory=sumo/inventory/agents \t{{{keywords}}}\n| parse regex \"(?<json_collector>\\{.+\\})\" \n| json field=json_collector \"id\"\n| json field=json_collector \"name\"\n| json field=json_collector \"fields\"\n| json field=json_collector \"ephemeral\"\n| json field=json_collector \"osName\"\n| json field=json_collector \"osArch\"\n| json field=json_collector \"lastSeenAlive\"\n| json field=json_collector \"alive\"\n| json field=json_collector \"collectorVersion\"\n| json field=json_collector \"sourceSyncMode\"\n| where {{field}} matches \"{{value}}\"\n| first(sourcesyncmode) as sourcesyncmode,first(ephemeral) as ephemeral,first(collectorversion) as collectorversion,first(alive) as alive,max(lastseenalive) as lastseenalive, count by id, name,osname,osarch \n| \"{{min_version}}\" as min_version\n| parse field =min_version \"*.*-*\" as major1,minor1,patch1\n| parse field =collectorVersion \"*.*-*\" as major,minor,patch | fields -_some_matched\n| if( major >= major1 and  num(minor) >= num(minor1)  and num(patch) >= num(patch1),\"compliant\",\"non-compliant\") as compliance\n\n| count by  collectorversion\n\n\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel386A285DB83D0A4E",
+            "title": "Inventory - Alive",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_source=\"agent_inventory\" _sourcecategory=sumo/inventory/agents \t{{{keywords}}}\n| parse regex \"(?<json_collector>\\{.+\\})\" \n| json field=json_collector \"id\"\n| json field=json_collector \"name\"\n| json field=json_collector \"fields\"\n| json field=json_collector \"ephemeral\"\n| json field=json_collector \"osName\"\n| json field=json_collector \"osArch\"\n| json field=json_collector \"lastSeenAlive\"\n| json field=json_collector \"alive\"\n| json field=json_collector \"collectorVersion\"\n| json field=json_collector \"sourceSyncMode\"\n| where {{field}} matches \"{{value}}\"\n| first(sourcesyncmode) as sourcesyncmode,first(ephemeral) as ephemeral,first(collectorversion) as collectorversion,first(alive) as alive,max(lastseenalive) as lastseenalive, count by id, name,osname,osarch \n| \"{{min_version}}\" as min_version\n| parse field =min_version \"*.*-*\" as major1,minor1,patch1\n| parse field =collectorVersion \"*.*-*\" as major,minor,patch | fields -_some_matched\n| if( major >= major1 and  num(minor) >= num(minor1)  and num(patch) >= num(patch1),\"compliant\",\"non-compliant\") as compliance\n\n| count by  alive\n\n\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel0F24B57A806AFA47",
+            "title": "Inventory - ephemeral",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_source=\"agent_inventory\" _sourcecategory=sumo/inventory/agents \t{{{keywords}}}\n| parse regex \"(?<json_collector>\\{.+\\})\" \n| json field=json_collector \"id\"\n| json field=json_collector \"name\"\n| json field=json_collector \"fields\"\n| json field=json_collector \"ephemeral\"\n| json field=json_collector \"osName\"\n| json field=json_collector \"osArch\"\n| json field=json_collector \"lastSeenAlive\"\n| json field=json_collector \"alive\"\n| json field=json_collector \"collectorVersion\"\n| json field=json_collector \"sourceSyncMode\"\n| where {{field}} matches \"{{value}}\"\n| first(sourcesyncmode) as sourcesyncmode,first(ephemeral) as ephemeral,first(collectorversion) as collectorversion,first(alive) as alive,max(lastseenalive) as lastseenalive, count by id, name,osname,osarch \n| \"{{min_version}}\" as min_version\n| parse field =min_version \"*.*-*\" as major1,minor1,patch1\n| parse field =collectorVersion \"*.*-*\" as major,minor,patch | fields -_some_matched\n| if( major >= major1 and  num(minor) >= num(minor1)  and num(patch) >= num(patch1),\"compliant\",\"non-compliant\") as compliance\n\n| count by  ephemeral\n\n\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel46A476B3B70BFB41",
+            "title": "Inventory - Osname",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_source=\"agent_inventory\" _sourcecategory=sumo/inventory/agents \t{{{keywords}}}\n| parse regex \"(?<json_collector>\\{.+\\})\" \n| json field=json_collector \"id\"\n| json field=json_collector \"name\"\n| json field=json_collector \"fields\"\n| json field=json_collector \"ephemeral\"\n| json field=json_collector \"osName\"\n| json field=json_collector \"osArch\"\n| json field=json_collector \"lastSeenAlive\"\n| json field=json_collector \"alive\"\n| json field=json_collector \"collectorVersion\"\n| json field=json_collector \"sourceSyncMode\"\n| where {{field}} matches \"{{value}}\"\n| first(sourcesyncmode) as sourcesyncmode,first(ephemeral) as ephemeral,first(collectorversion) as collectorversion,first(alive) as alive,max(lastseenalive) as lastseenalive, count by id, name,osname,osarch \n| \"{{min_version}}\" as min_version\n| parse field =min_version \"*.*-*\" as major1,minor1,patch1\n| parse field =collectorVersion \"*.*-*\" as major,minor,patch | fields -_some_matched\n| if( major >= major1 and  num(minor) >= num(minor1)  and num(patch) >= num(patch1),\"compliant\",\"non-compliant\") as compliance\n\n| count by  osname\n\n\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel1DA716A88A9D9B40",
+            "title": "Inventory -sourceSyncMode",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_source=\"agent_inventory\" _sourcecategory=sumo/inventory/agents \t{{{keywords}}}\n| parse regex \"(?<json_collector>\\{.+\\})\" \n| json field=json_collector \"id\"\n| json field=json_collector \"name\"\n| json field=json_collector \"fields\"\n| json field=json_collector \"ephemeral\"\n| json field=json_collector \"osName\"\n| json field=json_collector \"osArch\"\n| json field=json_collector \"lastSeenAlive\"\n| json field=json_collector \"alive\"\n| json field=json_collector \"collectorVersion\"\n| json field=json_collector \"sourceSyncMode\"\n| where {{field}} matches \"{{value}}\"\n| first(sourcesyncmode) as sourcesyncmode,first(ephemeral) as ephemeral,first(collectorversion) as collectorversion,first(alive) as alive,max(lastseenalive) as lastseenalive, count by id, name,osname,osarch \n| \"{{min_version}}\" as min_version\n| parse field =min_version \"*.*-*\" as major1,minor1,patch1\n| parse field =collectorVersion \"*.*-*\" as major,minor,patch | fields -_some_matched\n| if( major >= major1 and  num(minor) >= num(minor1)  and num(patch) >= num(patch1),\"compliant\",\"non-compliant\") as compliance\n\n| count by  sourceSyncMode\n\n\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel89A54BA8BA69A84E",
+            "title": "Inventory History by {{graph_series}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_source=\"agent_inventory\" _sourcecategory=sumo/inventory/agents \t{{{keywords}}}\n| parse regex \"(?<json_collector>\\{.+\\})\" \n| json field=json_collector \"id\"\n| json field=json_collector \"name\"\n| json field=json_collector \"fields\"\n| json field=json_collector \"ephemeral\"\n| json field=json_collector \"osName\"\n| json field=json_collector \"osArch\"\n| json field=json_collector \"lastSeenAlive\"\n| json field=json_collector \"alive\"\n| json field=json_collector \"collectorVersion\"\n| json field=json_collector \"sourceSyncMode\"\n| where {{field}} matches \"{{value}}\"\n| timeslice\n| first(sourcesyncmode) as sourcesyncmode,first(ephemeral) as ephemeral,first(collectorversion) as collectorversion,first(alive) as alive,max(lastseenalive) as lastseenalive, count by id, name,osname,osarch ,_timeslice\n| \"{{min_version}}\" as min_version\n| parse field =min_version \"*.*-*\" as major1,minor1,patch1\n| parse field =collectorVersion \"*.*-*\" as major,minor,patch \n| if( major >= major1 and  num(minor) >= num(minor1)  and num(patch) >= num(patch1),\"compliant\",\"non-compliant\") as compliance\n| fields -_some_matched,major,major1,minor,minor1,patch,patch1,_count\n| sort name asc\n\n| formatdate(tolong(lastseenalive),\"yyyy-MM-dd HH:mm:ss ZZZZ\") as lastseenalive \n| count by _timeslice,{{graph_series}} | transpose row _timeslice column {{graph_series}}\n\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "keywords",
+            "displayName": "keywords",
+            "defaultValue": "// any search keyword(s)",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "// anything"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "field",
+            "displayName": "field",
+            "defaultValue": "alive",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "name,osname,osarch,alive,ephemeral"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "value",
+            "displayName": "value",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "true,false"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "min_version",
+            "displayName": "min_version",
+            "defaultValue": "19.361-16",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "99.999-999,19.361-16"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "graph_series",
+            "displayName": "graph_series",
+            "defaultValue": "compliance",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "compliance,alive,ephemeral,sourcesyncmode"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}
+
