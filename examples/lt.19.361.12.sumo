@@ -1,0 +1,15 @@
+_source="agent_inventory" and _collector="HTTP" 
+| parse regex "(?<json_collector>\{.+\})"
+| json field=json_collector "id"
+| json field=json_collector "name"
+| json field=json_collector "fields"
+| json field=json_collector "ephemeral"
+| json field=json_collector "osName"
+| json field=json_collector "osArch"
+| json field=json_collector "lastSeenAlive"
+| json field=json_collector "alive"
+| json field=json_collector "collectorVersion"
+| json field=json_collector "sourceSyncMode"
+| first(collectorversion) as collectorversion,first(alive) as alive,max(lastseenalive) as lastseenalive, count by id, name, collectorversion,sourcesyncmode,ephemeral | sort name asc
+| where alive="true"
+| formatdate(tolong(lastseenalive),"yyyy-MM-dd HH:mm:ss ZZZZ") as lastseenalive 
