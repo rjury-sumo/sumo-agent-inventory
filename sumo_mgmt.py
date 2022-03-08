@@ -69,9 +69,9 @@ parser = argparse.ArgumentParser(description='A management script for upgrading,
 parser.add_argument('-upgrade', metavar='', type=str, nargs=1, help='upgrade given set of collectors to specified version')
 parser.add_argument('-batchSize', metavar='', type=int, nargs=1, help='(OPTIONAL) batch size for upgrading a given set of collectors')
 parser.add_argument('-addSource', metavar='', type=str, nargs=1, help='add a source from JSON file to given set of collectors')
-parser.add_argument('-accessid', metavar='', type=str, nargs=1, help='(OPTIONAL) access id for authentication')
-parser.add_argument('-accesskey', metavar='', type=str, nargs=1, help='(OPTIONAL) access key for authentication')
-parser.add_argument('-url', metavar='', type=str, nargs=1, help='URL for API call')
+parser.add_argument('-accessid', metavar='', type=str, nargs=1, help='(OPTIONAL) access id for authentication', default=[os.environ['SUMO_ACCESS_ID']])
+parser.add_argument('-accesskey', metavar='', type=str, nargs=1, help='(OPTIONAL) access key for authentication', default=[os.environ['SUMO_ACCESS_KEY']])
+parser.add_argument('-url', metavar='', type=str, nargs=1, help='URL for API call in format https://api.sumologic.com/api/v1/')
 parser.add_argument('-filter', metavar='', type=str, nargs=1, help='(OPTIONAL) filter list of all collectors by given type and condition')
 parser.add_argument('-listVersions', action='store_true', help='list the versions of a given set of collectors')
 parser.add_argument('-getSources', action='store_true', help='list the sources of a given set of collectors')
@@ -239,7 +239,8 @@ def get_collectors(path, filters, aliveBeforeDays=0):
         r = requests.get(url, params=payload, auth=(args.accessid[0], args.accesskey[0]))
 
         if r.status_code != 200 and r.status_code != 201:
-            log('[ERROR] %s' % r.json()['message'].lower()[:-1])
+            log("[ERROR] code: %s for url: %s key: %s" % (r.status_code,url,args.accessid))
+            log('[ERROR] %s' % r.json())
             break
 
         sublist = json.loads(r.text)['collectors']
@@ -696,8 +697,9 @@ def delete_offline_collectors():
 
     if r.status_code != 200 and r.status_code != 201:
         log('[ERROR] Failed to delete offline Collectors')
+        log('[ERROR] %s' % r.json()['message'].lower()[:-1])
     else:
-        log('[ERROR] Successfully deleted offline Collectors')
+        log('Successfully deleted offline Collectors')
 
 def add_ingest_budget(id,collectorId):
     url = args.url[0] + 'ingestBudgets/' + id +'/collectors/' + str(collectorId)
